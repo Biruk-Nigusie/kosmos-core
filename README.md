@@ -1,15 +1,20 @@
-# Elysia with Bun runtime
-
 ## Getting Started
-To get started with this template, simply paste this command into your terminal:
-```bash
-bun create elysia ./elysia-example
-```
+
+1. Install dependencies:
+   bun install
+
+2. Configure environment:
+   Create a .env file using .env.example as a reference and set your values.
+
+3. Database Setup:
+   Ensure your PostgreSQL database has the ltree extension enabled:
+   CREATE EXTENSION IF NOT EXISTS "ltree";
 
 ## Development
-To start the development server run:
-```bash
-bun run dev
-```
 
-Open http://localhost:3000/ with your browser to see the result.
+Run the server:
+bun run src/index.ts
+change PORT with what you set in .env
+
+* API: http://localhost:<PORT>
+* API Docs: http://localhost:<PORT>/openapi
