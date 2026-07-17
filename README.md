@@ -14,7 +14,6 @@
 
 Run the server:
 bun run src/index.ts
-change PORT with what you set in .env
 
-* API: http://localhost:<PORT>
-* API Docs: http://localhost:<PORT>/openapi
+* API: http://localhost:9000
+* API Docs: http://localhost:9000/openapi
