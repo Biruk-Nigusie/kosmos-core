@@ -1,9 +1,11 @@
 import { Elysia } from "elysia";
 import { env } from "./config/env";
 import { openapi } from "@elysia/openapi";
+import { authRoutes } from "./routes/auth.routes";
 
 const app = new Elysia()
   .use(openapi())
+  .use(authRoutes)
   .get("/", () => "Hello Elysia")
   .listen(env.PORT);
 

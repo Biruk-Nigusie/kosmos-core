@@ -7,6 +7,7 @@
   },
   "dependencies": {
     "@elysia/openapi": "^1.4.15",
+    "bcrypt": "^6.0.0",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^1.0.0-rc.4",
     "elysia": "latest",
@@ -14,6 +15,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
     "@types/pg": "^8.20.0",
     "bun-types": "latest",
     "drizzle-kit": "^1.0.0-rc.4",

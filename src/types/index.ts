@@ -1,3 +1,5 @@
+import { t } from "elysia";
+
 export interface DeviceMetadata {
   browser: string;
   os: string;
@@ -24,3 +26,10 @@ export interface UserPreferences {
   sidebarCollapsed: boolean;
   defaultEditorView: "markdown" | "rich-text";
 }
+
+export const registrationSchema = t.Object({
+  email: t.String(),
+  password: t.String(),
+});
+
+export type registrationType = typeof registrationSchema.static;
