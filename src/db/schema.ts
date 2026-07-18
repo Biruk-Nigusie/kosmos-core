@@ -70,7 +70,16 @@ export const user_sessions = p.pgTable(
     p.index("user_id_idx").on(table.user_id),
   ],
 );
-
+export const password_resets = p.pgTable("password_resets", {
+  id: p.uuid("id").defaultRandom().primaryKey(),
+  userId: p
+    .uuid("user_id")
+    .references(() => users.id)
+    .notNull(),
+  code: p.text("code").notNull(),
+  createdAt: p.timestamp("created_at").defaultNow().notNull(),
+  expiresAt: p.timestamp("expires_at").notNull(),
+});
 export const profiles = p.pgTable("profiles", {
   id: p.uuid("id").primaryKey().defaultRandom(),
   user_id: p
@@ -94,13 +103,13 @@ export const user_settings = p.pgTable("user_settings", {
   updated_at: p.timestamp().$onUpdateFn(() => new Date()),
 });
 
-export const verification_tokens = p.pgTable("verification_tokens", {
+export const verification_codes = p.pgTable("verification_codes", {
   id: p.uuid("id").primaryKey().defaultRandom(),
   user_id: p
     .uuid("user_id")
     .references(() => users.id, { onDelete: "cascade" })
     .notNull(),
-  token: p.text("token").notNull(),
+  code: p.varchar("code", { length: 6 }).notNull(),
   type: tokenTypeEnum("type").notNull(),
   expires_at: p.timestamp("expires_at").notNull(),
   created_at: p.timestamp("created_at").defaultNow().notNull(),

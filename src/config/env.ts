@@ -2,6 +2,8 @@ import { z } from "zod";
 
 const envSchema = z.object({
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
+  RESEND_API_KEY: z.string().min(1, "RESEND_API_KEY is required"),
+  JWT_SECRET: z.string().min(1, "JWT_SECRET is required"),
   PORT: z.coerce.number().default(9000),
 });
 
