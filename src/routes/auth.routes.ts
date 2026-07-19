@@ -18,6 +18,8 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
     body: resendSchema,
   })
   .post("/login", authController.login, { body: loginSchema })
+  .post("/logout", authController.logout)
+  .post("/logout-all", authController.logoutAll)
   .post("/forgot-password", authController.forgotPassword, {
     body: forgotPasswordSchema,
   })

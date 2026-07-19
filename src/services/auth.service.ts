@@ -70,7 +70,7 @@ export const AuthService = {
         user_id: user.id,
         code: verification_code,
         type: "email_verification",
-        expires_at: new Date(Date.now() + 60 * 1000), //15 min
+        expires_at: new Date(Date.now() + 15 * 60 * 1000), //15 min
       });
       return user;
     });

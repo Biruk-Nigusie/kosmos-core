@@ -28,6 +28,10 @@ export const authController = {
   },
   login: async (Context: any) => {
     const { body, set, jwt, request, cookie } = Context;
+    if (cookie.refresh_token.value) {
+      set.status = 400;
+      return { success: false, message: "Already logged in" };
+    }
     const { email, password } = body as loginType;
 
     const userAgent = request.headers.get("user-agent") || "";
@@ -75,24 +79,37 @@ export const authController = {
       };
     }
   },
-  logout: async ({ cookie }: any) => {
+  logout: async ({ cookie, set }: any) => {
     const refreshToken = cookie.refresh_token.value;
-    if (refreshToken) {
-      await AuthService.logout(refreshToken);
+
+    if (!refreshToken) {
+      set.status = 400;
+      return { success: false, message: "Already logged out" };
     }
 
-    // 2. Clear Browser Cookies(access an refresh)
+    await AuthService.logout(refreshToken);
+
     cookie.access_token.set({ value: "", maxAge: 0 });
     cookie.refresh_token.set({ value: "", maxAge: 0 });
 
-    return { success: true, message: "Logged out" };
+    return { success: true, message: "Logged out successfully" };
   },
-  logoutAll: async ({ cookie, jwt }: any) => {
-    const user = await jwt.verify(cookie.access_token.value);
+  logoutAll: async ({ cookie, jwt, set }: any) => {
+    const token = cookie.access_token.value;
 
-    if (user) {
-      await AuthService.logoutAll(user.userId);
+    if (!token) {
+      set.status = 401;
+      return { success: false, message: "Not authenticated" };
     }
+
+    const user = await jwt.verify(token);
+
+    if (!user) {
+      set.status = 401;
+      return { success: false, message: "Invalid session" };
+    }
+
+    await AuthService.logoutAll(user.userId);
 
     cookie.access_token.set({ value: "", maxAge: 0 });
     cookie.refresh_token.set({ value: "", maxAge: 0 });
