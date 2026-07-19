@@ -27,8 +27,35 @@ export const sendVerificationEmail = async (
   });
 
   if (error) {
-    console.error("Resend Email Error:", error);
     throw new Error(`Failed to send email: ${error.message}`);
+  }
+  return data;
+};
+
+export const sendCollaborationEmail = async (
+  email: string,
+  noteTitle: string,
+  senderEmail: string,
+  inviteLink: string,
+) => {
+  const { data, error } = await resend.emails.send({
+    from: "invite@biruk.site", // Or a dedicated invite address
+    to: [email],
+    subject: `Invitation to collaborate on: ${noteTitle}`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2>You've been invited!</h2>
+        <p>${senderEmail} has invited you to collaborate on the note: <strong>${noteTitle}</strong>.</p>
+        <div style="margin: 30px 0;">
+          <a href="${inviteLink}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Accept Invitation</a>
+        </div>
+        <p>If you don't recognize this request, you can safely ignore this email.</p>
+      </div>
+    `,
+  });
+
+  if (error) {
+    throw new Error(`Failed to send invitation: ${error.message}`);
   }
   return data;
 };

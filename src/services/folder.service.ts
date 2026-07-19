@@ -110,8 +110,7 @@ export const FolderService = {
         .where(and(eq(folders.user_id, userId), isNull(folders.deleted_at)))
         .orderBy(asc(folders.path));
     } catch (error) {
-      console.error("DEBUG - Database Query Error:", error);
-      throw error; 
+      throw error;
     }
   },
   async restoreFolder(userId: string, folderId: string) {

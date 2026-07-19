@@ -1,6 +1,6 @@
-import { and, eq, isNotNull, isNull } from "drizzle-orm";
+import { and, eq, exists, isNotNull, isNull, or } from "drizzle-orm";
 import { db } from "../db/db";
-import { notes } from "../db/schema";
+import { note_collaborators, notes } from "../db/schema";
 import { createNoteType, updateNoteType } from "../types";
 export const NoteService = {
   async createNote(userId: string, data: createNoteType) {
@@ -13,7 +13,7 @@ export const NoteService = {
       .insert(notes)
       .values({
         user_id: userId,
-        folder_id: data.folderId,
+        folder_id: data.folderId && data.folderId !== "" ? data.folderId : null,
         title: data.title,
         slug: slung,
         type: data.type || "document",
@@ -28,7 +28,21 @@ export const NoteService = {
       .from(notes)
       .where(
         and(
-          eq(notes.user_id, userId),
+          // Check for ownership OR collaboration
+          or(
+            eq(notes.user_id, userId),
+            exists(
+              db
+                .select()
+                .from(note_collaborators)
+                .where(
+                  and(
+                    eq(note_collaborators.note_id, notes.id),
+                    eq(note_collaborators.user_id, userId),
+                  ),
+                ),
+            ),
+          ),
           isNull(notes.deleted_at),
           folderId ? eq(notes.folder_id, folderId) : undefined,
         ),
@@ -41,17 +55,50 @@ export const NoteService = {
       .where(
         and(
           eq(notes.id, noteId),
-          eq(notes.user_id, userId), //not belongs to this user
+          or(
+            eq(notes.user_id, userId), // User is the owner
+            exists(
+              // User is a collaborator
+              db
+                .select()
+                .from(note_collaborators)
+                .where(
+                  and(
+                    eq(note_collaborators.note_id, noteId),
+                    eq(note_collaborators.user_id, userId),
+                  ),
+                ),
+            ),
+          ),
         ),
       );
 
-    return result[0]; //single note or undefined
+    return result[0];
   },
   async updateNote(userId: string, noteId: string, data: updateNoteType) {
     const [updatedNote] = await db
       .update(notes)
-      .set(data) //updated automatically
-      .where(and(eq(notes.id, noteId), eq(notes.user_id, userId)))
+      .set(data)
+      .where(
+        and(
+          eq(notes.id, noteId),
+          or(
+            eq(notes.user_id, userId), // Is Owner
+            exists(
+              db
+                .select()
+                .from(note_collaborators)
+                .where(
+                  and(
+                    eq(note_collaborators.note_id, noteId),
+                    eq(note_collaborators.user_id, userId),
+                    eq(note_collaborators.permission, "editor"), //must be Editor
+                  ),
+                ),
+            ),
+          ),
+        ),
+      )
       .returning();
 
     return updatedNote;

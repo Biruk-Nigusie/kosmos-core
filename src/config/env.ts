@@ -5,6 +5,7 @@ const envSchema = z.object({
   RESEND_API_KEY: z.string().min(1, "RESEND_API_KEY is required"),
   JWT_SECRET: z.string().min(1, "JWT_SECRET is required"),
   PORT: z.coerce.number().default(9000),
+  FRONTEND_URL: z.string().url("FRONTEND_URL must be a valid URL"),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);

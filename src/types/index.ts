@@ -75,8 +75,8 @@ export const updateFolderSchema = t.Object({
 
 export const createNoteSchema = t.Object({
   title: t.String({ minLength: 1, maxLength: 255 }),
-  folderId: t.Optional(t.String({ format: "uuid" })),
-  type: t.Optional(t.Union([t.Literal("document"), t.Literal("whiteboard")])), //enum type
+  folderId: t.Optional(t.Union([t.String({ format: "uuid" }), t.Null()])),
+  type: t.Optional(t.Union([t.Literal("document"), t.Literal("whiteboard")])),
   content: t.Optional(t.Any()),
 });
 
@@ -94,6 +94,15 @@ export const updateNoteSchema = t.Object({
   ),
   content: t.Optional(t.Union([t.String(), t.Null()])),
 });
+export const inviteUserSchema = t.Object({
+  noteId: t.String({ format: "uuid" }),
+  email: t.String({ format: "email" }),
+  permission: t.Union([t.Literal("editor"), t.Literal("viewer")]),
+});
+
+export const acceptInvitationSchema = t.Object({
+  invitationId: t.String({ format: "uuid" }),
+});
 export type resendType = typeof resendSchema.static;
 export type verificationType = typeof verificationSchema.static;
 export type registrationType = typeof registrationSchema.static;
@@ -106,3 +115,5 @@ export type createNoteType = typeof createNoteSchema.static;
 export type listNotesType = typeof listNotesSchema.static;
 export type getNoteType = typeof getNoteSchema.static;
 export type updateNoteType = typeof updateNoteSchema.static;
+export type inviteUserType = typeof inviteUserSchema.static;
+export type acceptInvitationType = typeof acceptInvitationSchema.static;

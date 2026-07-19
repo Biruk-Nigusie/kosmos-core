@@ -6,6 +6,7 @@ import { rateLimit } from "elysia-rate-limit";
 import { jwt } from "@elysiajs/jwt";
 import { folderRoutes } from "./routes/folder.routes";
 import { noteRoutes } from "./routes/note.routes";
+import { collaborationRoutes } from "./routes/collaboration.routes";
 
 const app = new Elysia()
   .use(openapi())
@@ -24,6 +25,7 @@ const app = new Elysia()
   .use(authRoutes)
   .use(folderRoutes)
   .use(noteRoutes)
+  .use(collaborationRoutes)
   .get("/", () => "Hello Elysia")
   .onError(({ code, error }) => {
     if (code === "VALIDATION") {
