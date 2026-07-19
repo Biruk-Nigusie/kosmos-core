@@ -181,9 +181,17 @@ export const folders: any = p.pgTable(
       .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
     created_at: p.timestamp().notNull().defaultNow(),
+    deleted_at: p.timestamp("deleted_at"),
   },
+
   //index specifically optimized for hierarchical path searches
-  (table) => [p.index("path_gist_idx").using("gist", table.path)],
+  (table) => [
+    p.index("path_gist_idx").using("gist", table.path),
+    p
+      .index("active_folders_idx")
+      .on(table.id)
+      .where(sql`deleted_at IS NULL`),
+  ],
 );
 
 export const notes = p.pgTable(

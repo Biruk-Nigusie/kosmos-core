@@ -62,9 +62,47 @@ export const resetPasswordSchema = t.Object({
   code: t.String({ minLength: 6, maxLength: 6 }),
   newPassword: t.String({ minLength: 8 }),
 });
+
+export const createFolderSchema = t.Object({
+  name: t.String({ minLength: 1, maxLength: 100 }),
+  parentId: t.Optional(
+    t.Union([t.String({ format: "uuid" }), t.Null(), t.Literal("")]),
+  ),
+});
+export const updateFolderSchema = t.Object({
+  name: t.Optional(t.String({ minLength: 1, maxLength: 100 })),
+});
+
+export const createNoteSchema = t.Object({
+  title: t.String({ minLength: 1, maxLength: 255 }),
+  folderId: t.Optional(t.String({ format: "uuid" })),
+  type: t.Optional(t.Union([t.Literal("document"), t.Literal("whiteboard")])), //enum type
+  content: t.Optional(t.Any()),
+});
+
+export const listNotesSchema = t.Object({
+  folderId: t.Optional(t.String({ format: "uuid" })),
+});
+
+export const getNoteSchema = t.Object({
+  id: t.String({ format: "uuid" }),
+});
+export const updateNoteSchema = t.Object({
+  title: t.Optional(t.String()),
+  folderId: t.Optional(
+    t.Union([t.String({ format: "uuid" }), t.Null(), t.Literal("")]),
+  ),
+  content: t.Optional(t.Union([t.String(), t.Null()])),
+});
 export type resendType = typeof resendSchema.static;
 export type verificationType = typeof verificationSchema.static;
 export type registrationType = typeof registrationSchema.static;
 export type loginType = typeof loginSchema.static;
 export type forgotPasswordType = typeof forgotPasswordSchema.static;
 export type resetPasswordType = typeof resetPasswordSchema.static;
+export type createFolderType = typeof createFolderSchema.static;
+export type updateFolderType = typeof updateFolderSchema.static;
+export type createNoteType = typeof createNoteSchema.static;
+export type listNotesType = typeof listNotesSchema.static;
+export type getNoteType = typeof getNoteSchema.static;
+export type updateNoteType = typeof updateNoteSchema.static;
