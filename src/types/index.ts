@@ -103,6 +103,13 @@ export const inviteUserSchema = t.Object({
 export const acceptInvitationSchema = t.Object({
   invitationId: t.String({ format: "uuid" }),
 });
+
+export const updateProfileSchema = t.Object({
+  display_name: t.Optional(t.String({ maxLength: 100 })),
+  bio: t.Optional(t.String()),
+  avatar_url: t.Optional(t.String()),
+});
+
 export type resendType = typeof resendSchema.static;
 export type verificationType = typeof verificationSchema.static;
 export type registrationType = typeof registrationSchema.static;
@@ -117,3 +124,5 @@ export type getNoteType = typeof getNoteSchema.static;
 export type updateNoteType = typeof updateNoteSchema.static;
 export type inviteUserType = typeof inviteUserSchema.static;
 export type acceptInvitationType = typeof acceptInvitationSchema.static;
+
+export type updateProfileType = typeof updateProfileSchema.static;
