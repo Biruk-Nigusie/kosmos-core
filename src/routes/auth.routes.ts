@@ -8,6 +8,7 @@ import {
   resetPasswordSchema,
   verificationSchema,
 } from "../types";
+import { authMiddleware } from "../middlewares/auth.middleware";
 
 export const authRoutes = new Elysia({ prefix: "/auth" })
   .post("/register", authController.register, { body: registrationSchema })
@@ -19,11 +20,12 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
     body: resendSchema,
   })
   .post("/login", authController.login, { body: loginSchema })
-  .post("/logout", authController.logout)
-  .post("/logout-all", authController.logoutAll)
   .post("/forgot-password", authController.forgotPassword, {
     body: forgotPasswordSchema,
   })
   .post("/reset-password", authController.resetPassword, {
     body: resetPasswordSchema,
-  });
+  })
+  .use(authMiddleware)
+  .post("/logout", authController.logout)
+  .post("/logout-all", authController.logoutAll);

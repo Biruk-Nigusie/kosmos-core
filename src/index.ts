@@ -9,6 +9,9 @@ import { noteRoutes } from "./routes/note.routes";
 import { collaborationRoutes } from "./routes/collaboration.routes";
 import { noteWs } from "./ws/note.ws";
 import { profileRoutes } from "./routes/profile.routes";
+import { settingsRoutes } from "./routes/settings.routes";
+import { authMiddleware } from "./middlewares/auth.middleware";
+import { errorHandler } from "./middlewares/error.middleware";
 
 const app = new Elysia()
   .use(openapi())
@@ -24,31 +27,17 @@ const app = new Elysia()
       max: 5, //5 request per min
     }),
   )
+
   .use(authRoutes)
+  .use(authMiddleware)
+  .use(settingsRoutes)
   .use(folderRoutes)
   .use(noteRoutes)
   .use(collaborationRoutes)
   .use(profileRoutes)
   .use(noteWs)
   .get("/", () => "Hello Elysia")
-  .onError(({ code, error }) => {
-    if (code === "VALIDATION") {
-      const firstError = (error as ValidationError).all[0];
-
-      if (firstError.path === "/password") {
-        return {
-          error:
-            "Password must be a mix of uppercase, lowercase, numbers, and symbols.",
-        };
-      }
-
-      if (firstError.path === "/email") {
-        return { error: "Please provide a valid email address." };
-      }
-
-      return { error: firstError.message };
-    }
-  })
+  .use(errorHandler)
   .listen(env.PORT);
 
 console.log(

@@ -17,16 +17,45 @@ export interface UserPreferences {
 
   // Notifications
   notifications: {
-    mentions: boolean;
-    sharedNotes: boolean;
-    digestEmails: boolean;
+    mentions?: boolean;
+    sharedNotes?: boolean;
+    digestEmails?: boolean;
   };
 
   // UI State
   sidebarCollapsed: boolean;
   defaultEditorView: "markdown" | "rich-text";
 }
-
+export interface UpdateSettingsBody {
+  notification_enabled?: boolean;
+  preferences?: Partial<UserPreferences>; //take all UserPreferences and make them optional
+}
+export const updateSettingsBodySchema = t.Object({
+  notification_enabled: t.Optional(t.Boolean()),
+  preferences: t.Optional(
+    t.Object({
+      theme: t.Optional(
+        t.Union([t.Literal("light"), t.Literal("dark"), t.Literal("system")]),
+      ),
+      fontSize: t.Optional(
+        t.Union([t.Literal("small"), t.Literal("medium"), t.Literal("large")]),
+      ),
+      highContrastMode: t.Optional(t.Boolean()),
+      keyboardShortcuts: t.Optional(t.Boolean()),
+      notifications: t.Optional(
+        t.Object({
+          mentions: t.Optional(t.Boolean()),
+          sharedNotes: t.Optional(t.Boolean()),
+          digestEmails: t.Optional(t.Boolean()),
+        }),
+      ),
+      sidebarCollapsed: t.Optional(t.Boolean()),
+      defaultEditorView: t.Optional(
+        t.Union([t.Literal("markdown"), t.Literal("rich-text")]),
+      ),
+    }),
+  ),
+});
 export const registrationSchema = t.Object({
   email: t.String({ format: "email" }),
   password: t.String({
