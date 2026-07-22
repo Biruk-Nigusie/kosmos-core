@@ -13,6 +13,7 @@ import { settingsRoutes } from "./routes/settings.routes";
 import { authMiddleware } from "./middlewares/auth.middleware";
 import { errorHandler } from "./middlewares/error.middleware";
 import { auditRoutes } from "./routes/audit.routes";
+import { startTrashCleanupCron } from "./services/cleanup.service";
 
 const app = new Elysia()
   .use(openapi())
@@ -38,7 +39,7 @@ const app = new Elysia()
   .use(profileRoutes)
   .use(noteWs)
   .use(auditRoutes)
-  .get("/", () => "Hello Elysia")
+  .get("/health", () => "Hello Kosmos")
   .use(errorHandler)
   .listen({ port: env.PORT, hostname: "0.0.0.0" });
 
@@ -48,3 +49,4 @@ console.log(
 console.log(
   `🐇 API Docs: http://${app.server?.hostname}:${app.server?.port}/openapi`,
 );
+startTrashCleanupCron();

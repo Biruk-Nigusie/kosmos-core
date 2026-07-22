@@ -9,6 +9,7 @@ import {
   resetPasswordType,
   verificationType,
 } from "../types";
+import { env } from "../config/env";
 export const authController = {
   register: async ({ body, set }: Context & { body: registrationType }) => {
     const data = body as registrationType;
@@ -51,7 +52,7 @@ export const authController = {
       cookie.access_token.set({
         value: accessToken,
         httpOnly: true,
-        secure: false,
+        secure: env.DEVELOPMENT === "PRODUCTION",
         sameSite: "strict",
         maxAge: 15 * 60,
         path: "/",
@@ -81,7 +82,7 @@ export const authController = {
     const deviceMetadata = {
       browser: result.browser.name || "Unknown",
       os: result.os.name || "Unknown",
-      ip_address: clientIp, // 👈 Now it will pull the actual IP!
+      ip_address: clientIp, 
       is_mobile: result.device.type === "mobile",
     };
     try {
@@ -94,7 +95,7 @@ export const authController = {
       cookie.access_token.set({
         value: accessToken,
         httpOnly: true,
-        secure: false, // Requires HTTPS
+        secure: env.DEVELOPMENT === "PRODUCTION", 
         sameSite: "strict",
         maxAge: 15 * 60, // 15 minutes
         path: "/",
@@ -104,7 +105,7 @@ export const authController = {
       cookie.refresh_token.set({
         value: refreshToken,
         httpOnly: true,
-        secure: false,
+        secure: env.DEVELOPMENT === "PRODUCTION",
         sameSite: "strict",
         maxAge: 7 * 24 * 60 * 60, // 7 days
         path: "/",

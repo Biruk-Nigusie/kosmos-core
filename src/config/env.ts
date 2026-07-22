@@ -6,8 +6,9 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(1, "JWT_SECRET is required"),
   PORT: z.coerce.number().default(9000),
   FRONTEND_URL: z.string().url("FRONTEND_URL must be a valid URL"),
-  ADMIN_EMAIL:z.string().min(1, "ADMIN_EMAIL is required"),
-  ADMIN_PASSWORD:z.string().min(1, "ADMIN_PASSWORD is required")
+  ADMIN_EMAIL: z.string().min(1, "ADMIN_EMAIL is required"),
+  ADMIN_PASSWORD: z.string().min(1, "ADMIN_PASSWORD is required"),
+  DEVELOPMENT: z.string().min(1, "DEVELOPMENT required"),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);

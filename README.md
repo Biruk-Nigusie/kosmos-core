@@ -12,6 +12,9 @@
 
 ## Development
 
+create admin user
+bun run src/scripts/create-admin.ts
+
 Run the server:
 bun run src/index.ts
 
