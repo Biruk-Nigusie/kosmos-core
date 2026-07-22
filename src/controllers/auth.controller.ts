@@ -10,21 +10,61 @@ import {
   verificationType,
 } from "../types";
 export const authController = {
-  register: async ({ body, set }: Context) => {
+  register: async ({ body, set }: Context & { body: registrationType }) => {
     const data = body as registrationType;
     const existingUser = await AuthService.findUserByEmail(data.email);
+    console.log("pass", data.password, "conf_pass", data.confirmPassword);
 
+    if (data.password !== data.confirmPassword) {
+      set.status = 400;
+      return { error: "Passwords do not match" };
+    }
     if (existingUser) {
       set.status = 400;
       return { error: "User already exists" };
     }
+
     const newUser = await AuthService.createUser(data);
 
     set.status = 201;
     return {
-      message: "User created",
+      message:
+        "User created, use code sent to your email to verify your account",
       user: newUser,
     };
+  },
+  refresh: async (Context: any) => {
+    const { cookie, jwt, set } = Context;
+    const refreshToken = cookie.refresh_token?.value;
+    if (!refreshToken) {
+      set.status = 401;
+      return { error: "No refresh token provided" };
+    }
+
+    try {
+      const accessToken = await AuthService.refreshAccessToken(
+        refreshToken,
+        jwt,
+      );
+
+      // set the new access token
+      cookie.access_token.set({
+        value: accessToken,
+        httpOnly: true,
+        secure: false,
+        sameSite: "strict",
+        maxAge: 15 * 60,
+        path: "/",
+      });
+
+      return {
+        success: true,
+        message: "Token refreshed successfully",
+      };
+    } catch (error) {
+      set.status = 403;
+      return { error: "Invalid or expired refresh token" };
+    }
   },
   login: async (Context: any) => {
     const { body, set, jwt, request, cookie } = Context;

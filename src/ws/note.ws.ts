@@ -4,6 +4,7 @@ import { env } from "../config/env";
 import { db } from "../db/db";
 import { note_collaborators, notes, profiles } from "../db/schema";
 import { and, eq } from "drizzle-orm";
+import { VALID_EVENT_TYPES, WebSocketEventType } from "../types/index";
 //initialize and enable websocket
 export const noteWs = new Elysia({ websocket: {} })
   .use(jwt({ name: "jwt", secret: env.JWT_SECRET }))
@@ -59,13 +60,17 @@ export const noteWs = new Elysia({ websocket: {} })
       ws.subscribe(ws.data.params.noteId);
     },
     message(ws, message) {
+
       try {
         const data = JSON.parse(
           typeof message === "string" ? message : JSON.stringify(message),
-        );
-        if (!data.type) {
+          //use defined ws event types
+        ) as { type: WebSocketEventType; content?: any; [key: string]: any };
+        const valid = VALID_EVENT_TYPES.includes(data.type);
+        if (!data.type || !valid) {
           return;
         }
+        //check type is on WebSocketEventType
         const payload = {
           ...data,
           sender: (ws.data as any).user?.userId,

@@ -81,6 +81,28 @@ export const AuthService = {
       email: newUser.email,
     };
   },
+
+  async refreshAccessToken(refreshToken: string, jwt: any) {
+    // query the database session using the opaque token
+    const [session] = await db
+      .select()
+      .from(user_sessions)
+      .where(
+        and(
+          eq(user_sessions.refresh_token, refreshToken),
+          gt(user_sessions.expires_at, new Date()),
+        ),
+      );
+
+    if (!session) {
+      throw new Error("Invalid or expired refresh token");
+    }
+    const accessToken = await jwt.sign({
+      userId: session.user_id,
+    });
+
+    return accessToken;
+  },
   resendVerificationCode: async (email: string) => {
     return await db.transaction(async (tx) => {
       const [user] = await tx

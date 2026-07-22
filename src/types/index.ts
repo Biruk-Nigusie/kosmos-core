@@ -1,4 +1,4 @@
-import { t } from "elysia";
+import { Static, t } from "elysia";
 
 export interface DeviceMetadata {
   browser: string;
@@ -32,6 +32,9 @@ export const registrationSchema = t.Object({
   password: t.String({
     minLength: 8,
     pattern: "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*])[A-Za-z\\d!@#$%^&*]{8,}$",
+  }),
+  confirmPassword: t.String({
+    minLength: 8,
   }),
 });
 
@@ -110,9 +113,25 @@ export const updateProfileSchema = t.Object({
   avatar_url: t.Optional(t.String()),
 });
 
+// action types
+export const VALID_EVENT_TYPES = [
+  "DOC_UPDATE",
+  "DOC_TITLE_UPDATE",
+  "DOC_SAVE",
+  "CANVAS_DRAW",
+  "CANVAS_CLEAR",
+  "CANVAS_OBJECT",
+  "CURSOR_MOVE",
+  "USER_JOINED",
+  "USER_LEFT",
+  "SELECTION_CHANGE",
+  "PING",
+  "ERROR",
+] as const;
+
 export type resendType = typeof resendSchema.static;
 export type verificationType = typeof verificationSchema.static;
-export type registrationType = typeof registrationSchema.static;
+export type registrationType = Static<typeof registrationSchema>;
 export type loginType = typeof loginSchema.static;
 export type forgotPasswordType = typeof forgotPasswordSchema.static;
 export type resetPasswordType = typeof resetPasswordSchema.static;
@@ -126,3 +145,5 @@ export type inviteUserType = typeof inviteUserSchema.static;
 export type acceptInvitationType = typeof acceptInvitationSchema.static;
 
 export type updateProfileType = typeof updateProfileSchema.static;
+//union type from array
+export type WebSocketEventType = (typeof VALID_EVENT_TYPES)[number];

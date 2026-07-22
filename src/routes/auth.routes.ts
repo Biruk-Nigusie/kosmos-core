@@ -11,6 +11,7 @@ import {
 
 export const authRoutes = new Elysia({ prefix: "/auth" })
   .post("/register", authController.register, { body: registrationSchema })
+  .post("/refresh", authController.refresh)
   .post("/verify", authController.verify, {
     body: verificationSchema,
   })
