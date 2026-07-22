@@ -10,6 +10,7 @@ import { registrationType } from "../types";
 import bcrypt from "bcrypt";
 import { generateSecureCode } from "../utils/auth";
 import { sendVerificationEmail } from "../utils/mail";
+import { logActivity } from "./audit.service";
 
 export const AuthService = {
   async findUserByEmail(email: string) {
@@ -21,7 +22,7 @@ export const AuthService = {
     return existingUser || null;
   },
   async verifyUser(userId: string, code: string) {
-    return await db.transaction(async (tx) => {
+    const result = await db.transaction(async (tx) => {
       // 1. Find the code
       const [existingCode] = await tx
         .select()
@@ -51,6 +52,11 @@ export const AuthService = {
 
       return { success: true };
     });
+    //verify email audit log
+    await logActivity(userId, "update", "user_profile", userId, {
+      event: "email_verified",
+    });
+    return result;
   },
   async createUser(data: registrationType) {
     const hashedPassword = await bcrypt.hash(data.password, 10);
@@ -76,6 +82,11 @@ export const AuthService = {
     });
     //send email
     await sendVerificationEmail(newUser.email, verification_code, "verify");
+    //Registration audit log
+    await logActivity(newUser.id, "create", "user_profile", newUser.id, {
+      event: "user_registered",
+      email: newUser.email,
+    });
     return {
       id: newUser.id,
       email: newUser.email,
@@ -164,16 +175,47 @@ export const AuthService = {
       userId: user.id,
       role: user.role,
     });
-
+    //Login audit log
+    await logActivity(user.id, "create", "user_profile", user.id, {
+      event: "user_login",
+      device: deviceMetadata,
+    });
     return { accessToken, refreshToken };
   },
   async logout(refreshToken: string) {
-    await db
-      .delete(user_sessions)
-      .where(eq(user_sessions.refresh_token, refreshToken));
+    // 1. Find the session explicitly first
+    const existingSessions = await db
+      .select()
+      .from(user_sessions)
+      .where(eq(user_sessions.refresh_token, refreshToken))
+      .limit(1);
+
+    const session = existingSessions[0];
+
+    // 2. If found, log the audit event and delete the session
+    if (session) {
+      await logActivity(
+        session.user_id,
+        "delete",
+        "user_profile",
+        session.user_id,
+        {
+          event: "user_logout",
+          device: session.device_info,
+        },
+      );
+
+      await db
+        .delete(user_sessions)
+        .where(eq(user_sessions.refresh_token, refreshToken));
+    }
   },
+
   async logoutAll(userId: string) {
     await db.delete(user_sessions).where(eq(user_sessions.user_id, userId));
+    await logActivity(userId, "delete", "user_profile", userId, {
+      event: "user_logout_all_devices",
+    });
   },
   async requestPasswordReset(email: string) {
     return await db.transaction(async (tx) => {
@@ -215,6 +257,10 @@ export const AuthService = {
       });
 
       await sendVerificationEmail(email, code, "password_reset");
+      //password reset audit log
+      await logActivity(user.id, "create", "user_profile", user.id, {
+        event: "password_reset_requested",
+      });
       return { success: true };
     });
   },
@@ -253,5 +299,9 @@ export const AuthService = {
 
     // delete the used code
     await db.delete(password_resets).where(eq(password_resets.userId, user.id));
+    //reset password audit log
+    await logActivity(user.id, "update", "user_profile", user.id, {
+      event: "password_reset_completed",
+    });
   },
 };

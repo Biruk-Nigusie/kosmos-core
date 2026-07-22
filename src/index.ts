@@ -12,6 +12,7 @@ import { profileRoutes } from "./routes/profile.routes";
 import { settingsRoutes } from "./routes/settings.routes";
 import { authMiddleware } from "./middlewares/auth.middleware";
 import { errorHandler } from "./middlewares/error.middleware";
+import { auditRoutes } from "./routes/audit.routes";
 
 const app = new Elysia()
   .use(openapi())
@@ -21,12 +22,12 @@ const app = new Elysia()
       secret: env.JWT_SECRET,
     }),
   )
-  .use(
-    rateLimit({
-      duration: 60000, //1 min
-      max: 5, //5 request per min
-    }),
-  )
+  // .use(
+  //   rateLimit({
+  //     duration: 60000, //1 min
+  //     max: 10, //5 request per min
+  //   }),
+  // )
 
   .use(authRoutes)
   .use(authMiddleware)
@@ -36,9 +37,10 @@ const app = new Elysia()
   .use(collaborationRoutes)
   .use(profileRoutes)
   .use(noteWs)
+  .use(auditRoutes)
   .get("/", () => "Hello Elysia")
   .use(errorHandler)
-  .listen(env.PORT);
+  .listen({ port: env.PORT, hostname: "0.0.0.0" });
 
 console.log(
   `🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}`,

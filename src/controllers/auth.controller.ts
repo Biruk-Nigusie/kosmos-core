@@ -67,18 +67,21 @@ export const authController = {
     }
   },
   login: async (Context: any) => {
-    const { body, set, jwt, request, cookie } = Context;
+    const { body, set, jwt, request, cookie, server } = Context;
 
     const { email, password } = body as loginType;
 
     const userAgent = request.headers.get("user-agent") || "";
     const parser = new UAParser(userAgent);
     const result = parser.getResult();
-
+    const clientIp =
+      request.headers.get("x-forwarded-for") ||
+      (server ? server.requestIP(request)?.address : null) ||
+      "127.0.0.1";
     const deviceMetadata = {
       browser: result.browser.name || "Unknown",
       os: result.os.name || "Unknown",
-      ip_address: request.headers.get("x-forwarded-for") || "unknown",
+      ip_address: clientIp, // 👈 Now it will pull the actual IP!
       is_mobile: result.device.type === "mobile",
     };
     try {
