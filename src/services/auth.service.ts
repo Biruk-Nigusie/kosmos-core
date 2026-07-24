@@ -59,6 +59,7 @@ export const AuthService = {
     return result;
   },
   async createUser(data: registrationType) {
+    //check if disposable email TODO:
     const hashedPassword = await bcrypt.hash(data.password, 10);
     const verification_code = generateSecureCode();
     //database transaction if both(commit if both finish successfully), rollback if any thing goes wrong
@@ -123,7 +124,7 @@ export const AuthService = {
       if (!user) throw new Error("User not found");
       if (user.is_verified) throw new Error("User is already verified");
 
-      //if a code was created in the last 30 seconds
+      //if a code was created in the last 2 minutes
       const [cooldownCheck] = await tx
         .select({ count: sql<number>`count(*)` })
         .from(verification_codes)
@@ -132,14 +133,14 @@ export const AuthService = {
             eq(verification_codes.user_id, user.id),
             gt(
               verification_codes.created_at,
-              sql`now() - interval '30 seconds'`,
+              sql`now() - interval '2 minutes'`,
             ),
           ),
         );
 
       // if count > 0, the database says "Yes, one exists from < 30s ago"
       if (cooldownCheck && Number(cooldownCheck.count) > 0) {
-        throw new Error("Please wait 30 seconds before requesting a new code.");
+        throw new Error("Wait 2 minutes before requesting a new code.");
       }
 
       // 3. Otherwise, delete the old ones and send a new one
@@ -234,12 +235,12 @@ export const AuthService = {
         .where(
           and(
             eq(password_resets.userId, user.id),
-            gt(password_resets.createdAt, sql`now() - interval '30 seconds'`),
+            gt(password_resets.createdAt, sql`now() - interval '2 minutes'`),
           ),
         );
 
       if (cooldownCheck && Number(cooldownCheck.count) > 0) {
-        throw new Error("Please wait 30 seconds before requesting a new code.");
+        throw new Error("Please wait 2 minutes before requesting a new code.");
       }
 
       await tx

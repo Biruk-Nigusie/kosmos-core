@@ -14,7 +14,6 @@ export const authController = {
   register: async ({ body, set }: Context & { body: registrationType }) => {
     const data = body as registrationType;
     const existingUser = await AuthService.findUserByEmail(data.email);
-    console.log("pass", data.password, "conf_pass", data.confirmPassword);
 
     if (data.password !== data.confirmPassword) {
       set.status = 400;
@@ -82,7 +81,7 @@ export const authController = {
     const deviceMetadata = {
       browser: result.browser.name || "Unknown",
       os: result.os.name || "Unknown",
-      ip_address: clientIp, 
+      ip_address: clientIp,
       is_mobile: result.device.type === "mobile",
     };
     try {
@@ -95,7 +94,7 @@ export const authController = {
       cookie.access_token.set({
         value: accessToken,
         httpOnly: true,
-        secure: env.DEVELOPMENT === "PRODUCTION", 
+        secure: env.DEVELOPMENT === "PRODUCTION",
         sameSite: "strict",
         maxAge: 15 * 60, // 15 minutes
         path: "/",

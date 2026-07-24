@@ -7,7 +7,7 @@ export async function purgeTrash() {
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
   try {
-    console.log("--- Running folder/note cleanup every");
+    console.log("--- Running folder/note cleanup---");
 
     // permanently delete notes older than 30 days
     const deletedNotes = await db
@@ -30,13 +30,13 @@ export async function purgeTrash() {
 
     if (deletedNotes.length > 0 || deletedFolders.length > 0) {
       console.log(
-        `### Purged ${deletedNotes.length} notes and ${deletedFolders.length} folders from trash.`,
+        `--- Purged ${deletedNotes.length} notes and ${deletedFolders.length} folders from trash.`,
       );
     } else {
-      console.log("### Trash is clean");
+      console.log("--- Trash is clean ---");
     }
   } catch (error) {
-    console.error("### Error running cleanup:", error);
+    console.error("--- Error running --- cleanup:", error);
   }
 }
 

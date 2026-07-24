@@ -9,9 +9,14 @@ import {
   verificationSchema,
 } from "../types";
 import { authMiddleware } from "../middlewares/auth.middleware";
+import { registerRateLimit } from "../plugins/rate-limit";
 
 export const authRoutes = new Elysia({ prefix: "/auth" })
-  .post("/register", authController.register, { body: registrationSchema })
+  .group("", (app) =>
+    app.use(registerRateLimit).post("/register", authController.register, {
+      body: registrationSchema,
+    }),
+  )
   .post("/refresh", authController.refresh)
   .post("/verify", authController.verify, {
     body: verificationSchema,

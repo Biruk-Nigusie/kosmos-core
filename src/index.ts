@@ -1,6 +1,7 @@
 import { Elysia, ValidationError } from "elysia";
 import { env } from "./config/env";
 import { openapi } from "@elysia/openapi";
+import { cors } from "@elysiajs/cors";
 import { authRoutes } from "./routes/auth.routes";
 import { rateLimit } from "elysia-rate-limit";
 import { jwt } from "@elysiajs/jwt";
@@ -16,6 +17,14 @@ import { auditRoutes } from "./routes/audit.routes";
 import { startTrashCleanupCron } from "./services/cleanup.service";
 
 const app = new Elysia()
+  .use(
+    cors({
+      origin: env.FRONTEND_URL,
+      credentials: true,
+      methods: ["GET", "POST", "PATCH", "DELETE", "PUT"],
+      allowedHeaders: ["Content-Type", "Authorization"],
+    }),
+  )
   .use(openapi())
   .use(
     jwt({
@@ -23,12 +32,6 @@ const app = new Elysia()
       secret: env.JWT_SECRET,
     }),
   )
-  // .use(
-  //   rateLimit({
-  //     duration: 60000, //1 min
-  //     max: 10, //5 request per min
-  //   }),
-  // )
 
   .use(authRoutes)
   .use(authMiddleware)
